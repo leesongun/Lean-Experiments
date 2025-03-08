@@ -1,5 +1,6 @@
 import Mathlib.Algebra.Group.Basic
 import Mathlib.Algebra.Opposites
+import Mathlib.Tactic
 
 /--
 A more computable version of bijective.
@@ -20,16 +21,23 @@ class QuasiGroup (G : Type*) extends Mul G where
 A loop is a set with a binary operation that has a two-sided identity element,
 and for which left and right mulision are always possible.
 -/
-class Loop (G : Type*) extends MulOneClass G, QuasiGroup G
+class abbrev Loop (G : Type*) := MulOneClass G, QuasiGroup G
 
-class LeftBolLoop (G : Type*) extends Loop G where
+@[simps] class LeftBolLoop (G : Type*) extends Loop G, Inv G where
+  -- __ := inferInstanceAs $ Inv G
   left_bol (x y z : G) : x * (y * (x * z)) = ((x * y) * x) * z
+  inv a := (right_quotient a).inv 1
+  biinv (a : G) : (a⁻¹ * a) = 1 ∧ (a * a⁻¹) = 1 := by rfl
 
-class RightBolLoop (G : Type*) extends LeftBolLoop (Gᵐᵒᵖ) where
-
+theorem inv_behaves [l : LeftBolLoop G] (a : G) : (a⁻¹ * a) = 1 ∧ (a * a⁻¹) = 1 := by
+  exact l.biinv a
 /--
 A Moufang loop is a loop that is both left and right Bol loop.
 -/
 class MoufangLoop (G : Type*) extends Loop G where
   left_bol (x y z : G) : x * (y * (x * z)) = ((x * y) * x) * z
   right_bol (x y z : G) : ((z * x) * y) * z = z * (x * (y * x))
+  moufang (x y z : G) : (x * y) * (z * x) = x * (y * z) * x := by
+    rfl
+
+class Moufang
