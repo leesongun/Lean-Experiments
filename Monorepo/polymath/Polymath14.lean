@@ -28,8 +28,6 @@ lemma pow_upper x (k : ℕ) : f (x ^ k) ≤ k * f x + f 1:= by
       simpa [pow_succ] using p.norm_mul (x ^ n) x
     have h2 : f (x ^ n) ≤ (n : ℝ) * f x + f 1 := by
       simpa using ih
-    have hcast : (n + 1 : ℝ) = (n : ℝ) + 1 := by
-      simpa using (Nat.cast_add n 1)
     have h3 : f (x ^ (n + 1)) ≤ (n : ℝ) * f x + f 1 + f x := by
       linarith [h1, h2]
     have h4 : (n : ℝ) * f x + f 1 + f x = (n + 1 : ℝ) * f x + f 1 := by
@@ -37,7 +35,7 @@ lemma pow_upper x (k : ℕ) : f (x ^ k) ≤ k * f x + f 1:= by
         (n : ℝ) * f x + f 1 + f x = ((n : ℝ) + 1) * f x + f 1 := by
           ring
         _ = (n + 1 : ℝ) * f x + f 1 := by
-          simpa [hcast]
+          simp
     simpa [h4] using h3
 
 lemma pow_lower x k : f (x^(2^k)) ≥ (2^k) * f x + 1 - (2^k) := by
@@ -116,7 +114,7 @@ lemma aux_lemma_bound_fx : (x = s * w * y * s⁻¹) → (x = t * z * w⁻¹ * t�
     _ = f (x ^ 2 ^ n * x ^ 2 ^ n) := by simp [pow_add, pow_mul, pow_two]
     _ = f ((s * w * y * s⁻¹) ^ 2 ^ n * (t * z * w⁻¹ * t⁻¹) ^ 2 ^ n) := by simp_all
     _ = f ((s * (w * y) * s⁻¹) ^ 2 ^ n * (t * (z * w⁻¹) * t⁻¹) ^ 2 ^ n) := by group
-    _ = f ((s * (w * y) ^ (2 ^ n) * s⁻¹)  * (t * (z * w⁻¹) ^ (2 ^ n) * t⁻¹)) := by simp_all[conj_pow_group]
+    _ = f ((s * (w * y) ^ (2 ^ n) * s⁻¹)  * (t * (z * w⁻¹) ^ (2 ^ n) * t⁻¹)) := by simp_all
     _ = f (s * ((w * y) ^ (2 ^ n) * s⁻¹ * t * (z * w⁻¹) ^ (2 ^ n)) * t⁻¹) := by group
     _ ≤ f (s * ((w * y) ^ (2 ^ n) * s⁻¹ * t * (z * w⁻¹) ^ (2 ^ n))) + f t⁻¹ := by simp[p.norm_mul]
     _ ≤ f s + f ((w * y) ^ (2 ^ n) * s⁻¹ * t * (z * w⁻¹) ^ (2 ^ n)) + f t⁻¹ := by simp[p.norm_mul]
@@ -267,7 +265,7 @@ lemma walkSumZ_eq_neg_two (n : ℕ) (s : Fin (2 * n) → Bool) :
   calc
     (walkSumZ (2 * n) s : ℝ) = (2 : ℝ) * (countTrueZ (2 * n) s : ℝ) - (2 * n : ℝ) := h'
     _ = (2 : ℝ) * (countTrueZ (2 * n) s : ℝ) - (2 : ℝ) * ((n : ℤ) : ℝ) := by
-          simp [Nat.cast_mul, Nat.cast_two]
+        simp
     _ = -2 * ((n : ℤ) - countTrueZ (2 * n) s : ℝ) := by ring
 
 lemma abs_countTrue_le (n : ℕ) (s : Fin (2 * n) → Bool) :
@@ -278,7 +276,7 @@ lemma abs_countTrue_le (n : ℕ) (s : Fin (2 * n) → Bool) :
       2 * |((n : ℤ) - countTrueZ (2 * n) s : ℝ)| := by
     calc
       |(walkSumZ (2 * n) s : ℝ)| = |-2 * ((n : ℤ) - countTrueZ (2 * n) s : ℝ)| := by
-        simpa [h]
+        simp [h]
       _ = |(-2 : ℝ)| * |((n : ℤ) - countTrueZ (2 * n) s : ℝ)| := by simp [abs_mul]
       _ = 2 * |((n : ℤ) - countTrueZ (2 * n) s : ℝ)| := by simp
   have hnonneg : 0 ≤ |((n : ℤ) - countTrueZ (2 * n) s : ℝ)| := by
@@ -289,7 +287,7 @@ lemma abs_countTrue_le (n : ℕ) (s : Fin (2 * n) → Bool) :
     _ = |(walkSumZ (2 * n) s : ℝ)| := by symm; exact habs
 
 def flipAt {n : ℕ} (i : Fin n) (s : Fin n → Bool) : Fin n → Bool :=
-  fun j => if h : j = i then ! s j else s j
+  fun j => if j = i then ! s j else s j
 
 lemma sum_stepValR_mul (N : ℕ) (i j : Fin N) :
     ∑ s : (Fin N → Bool), stepValR (s i) * stepValR (s j) =
@@ -299,14 +297,14 @@ lemma sum_stepValR_mul (N : ℕ) (i j : Fin N) :
   · subst h
     have : ∀ s : Fin N → Bool, stepValR (s i) * stepValR (s i) = (1 : ℝ) := by
       intro s; cases s i <;> simp [stepValR]
-    simp [this, Fintype.card_fun]
+    simp [this]
   · have hj : j ≠ i := by exact ne_comm.mp h
     let g : (Fin N → Bool) → (Fin N → Bool) := flipAt i
     have hneg :
         ∀ s, stepValR (s i) * stepValR (s j) + stepValR (g s i) * stepValR (g s j) = 0 := by
       intro s
       have hi' : stepValR (g s i) = - stepValR (s i) := by
-        simpa [g, flipAt] using (stepValR_not (s i))
+        simp [g, flipAt]
       have hj' : stepValR (g s j) = stepValR (s j) := by
         simp [g, flipAt, hj]
       calc
@@ -332,7 +330,7 @@ lemma sum_walkSum_sq (N : ℕ) :
             (∑ j : Fin N, stepValR (s j)) := by
             simp [walkSumR, pow_two]
     _ = ∑ s : (Fin N → Bool), ∑ i : Fin N, ∑ j : Fin N, stepValR (s i) * stepValR (s j) := by
-            simp [Finset.sum_mul_sum, mul_comm, mul_left_comm, mul_assoc]
+            simp [Finset.sum_mul_sum]
     _ = ∑ i : Fin N, ∑ j : Fin N, ∑ s : (Fin N → Bool), stepValR (s i) * stepValR (s j) := by
             rw [Finset.sum_comm]
             refine Finset.sum_congr rfl ?_
@@ -343,9 +341,9 @@ lemma sum_walkSum_sq (N : ℕ) :
     _ = ∑ i : Fin N, (2 ^ N : ℝ) := by
             refine Finset.sum_congr rfl ?_
             intro i _hi
-            simpa using (Finset.sum_ite_eq (i := i) (f := fun _ : Fin N => (2 ^ N : ℝ)))
+            simp
     _ = (2 ^ N : ℝ) * N := by
-            simp [mul_comm]
+            simp [Finset.sum_const, mul_comm]
 
 lemma sum_abs_walkSum_le (N : ℕ) :
     ∑ s : (Fin N → Bool), |walkSumR N s| ≤ (2 ^ N : ℝ) * Real.sqrt N := by
@@ -361,16 +359,16 @@ lemma sum_abs_walkSum_le (N : ℕ) :
   have hsq :
       ∑ s : (Fin N → Bool), |walkSumR N s| ^ 2 =
         ∑ s : (Fin N → Bool), (walkSumR N s) ^ 2 := by
-      simp [pow_two, abs_mul_self]
+      simp [pow_two]
   have hcard : (∑ s : (Fin N → Bool), (1 : ℝ) ^ 2) = (2 ^ N : ℝ) := by
-      simp [Fintype.card_fun]
+      simp
   calc
     ∑ s : (Fin N → Bool), |walkSumR N s|
         ≤ Real.sqrt (∑ s : (Fin N → Bool), (walkSumR N s) ^ 2) *
             Real.sqrt (2 ^ N : ℝ) := by
               simpa [hsq, hcard] using h'
     _ = Real.sqrt ((2 ^ N : ℝ) * N) * Real.sqrt (2 ^ N : ℝ) := by
-              simp [sum_walkSum_sq, mul_comm, mul_left_comm, mul_assoc]
+              simp [sum_walkSum_sq, mul_comm, mul_left_comm]
     _ = (2 ^ N : ℝ) * Real.sqrt N := by
               have hpos : 0 ≤ (2 ^ N : ℝ) := by positivity
               have hposN : 0 ≤ (N : ℝ) := by positivity
@@ -386,8 +384,8 @@ lemma sum_abs_walkSum_le (N : ℕ) :
                               Real.sqrt ((2 ^ N : ℝ) * (2 ^ N : ℝ)) := by
                                 symm; exact Real.sqrt_mul hpos (2 ^ N : ℝ)
                           have hsq'' : Real.sqrt ((2 ^ N : ℝ) * (2 ^ N : ℝ)) = (2 ^ N : ℝ) := by
-                                simpa using (Real.sqrt_mul_self hpos)
-                          simpa [hsq', hsq'']
+                                simp [Real.sqrt_mul_self hpos]
+                          simp [hsq', hsq'']
                 _ = (2 ^ N : ℝ) * Real.sqrt N := by ring
 
 def headTailEquiv (n : ℕ) : (Fin (n + 1) → Bool) ≃ (Bool × (Fin n → Bool)) :=
@@ -418,6 +416,7 @@ lemma countTrueZ_headTail (n : ℕ) (p : Bool × (Fin n → Bool)) :
       (Fin.sum_univ_succ (f := fun i : Fin (n + 1) =>
         if (headTailEquiv n).symm (b, s) i then (1 : ℤ) else 0))
 
+omit p in
 lemma sum_walk_succ (m k : ℤ) (t : ℕ) :
     ∑ s : (Fin (t + 1) → Bool),
         f (g x y (m + walkSumZ (t + 1) s) (k - countTrueZ (t + 1) s))
@@ -469,7 +468,7 @@ lemma sum_walk_succ (m k : ℤ) (t : ℕ) :
           f (g x y (m - 1 + walkSumZ t s) (k - countTrueZ t s)) +
         ∑ s : Fin t → Bool,
           f (g x y (m + 1 + walkSumZ t s) (k - 1 - countTrueZ t s)) := by
-          simpa [add_comm]
+          simp [add_comm]
 
 lemma iter_split_g (m k : ℤ) :
     ∀ t : ℕ,
@@ -508,7 +507,7 @@ lemma iter_split_g (m k : ℤ) :
             2 * (t : ℝ) + ((2 ^ t : ℝ)⁻¹ / 2) * (sum1 + sum2) := by
         ring
       have hpow : ((2 ^ t : ℝ)⁻¹ / 2) = (2 ^ (t + 1) : ℝ)⁻¹ := by
-        simp [pow_succ, div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc]
+        simp [pow_succ, div_eq_mul_inv, mul_comm]
       have hdiv' :
           (f (g x y (m - 1) k) + f (g x y (m + 1) (k - 1))) / 2
             ≤ 2 * (t : ℝ) + (1 / (2 ^ (t + 1) : ℝ)) * (sum1 + sum2) := by
@@ -584,7 +583,7 @@ theorem bound_g (n : ℕ) :
       ∑ s : Fin N → Bool, |(walkSumZ N s : ℝ)| ≤ (2 ^ N : ℝ) * Real.sqrt N := by
     simpa [walkSumR_eq] using sum_abs_walkSum_le (N := N)
   have hcard : (Fintype.card (Fin N → Bool) : ℝ) = 2 ^ N := by
-    simp [Fintype.card_fun]
+    simp
   have hsum_scaled :
       (1 / (2 ^ N : ℝ)) *
           (∑ s : Fin N → Bool,
@@ -638,12 +637,12 @@ theorem bound_g (n : ℕ) :
               ∑ s : Fin N → Bool, (2 * f 1)
               = (1 / (2 ^ N : ℝ)) *
                   ((Fintype.card (Fin N → Bool) : ℝ) * (2 * f 1)) := by
-                    simp [mul_comm, mul_left_comm, mul_assoc]
+                    simp [mul_comm, mul_assoc]
           _ = (1 / (2 ^ N : ℝ)) * ((2 ^ N : ℝ) * (2 * f 1)) := by
-                simp [hcard]
+                simp
           _ = 2 * f 1 := by
                 field_simp [hposN']
-      simpa [hsum2_eq]
+      linarith [hsum2_eq]
     have hsum3 :
         (1 / (2 ^ N : ℝ)) *
             (∑ s : Fin N → Bool,
@@ -653,7 +652,7 @@ theorem bound_g (n : ℕ) :
             + (1 / (2 ^ N : ℝ)) *
               ∑ s : Fin N → Bool, (2 * f 1) := by
         classical
-        simp [Finset.sum_add_distrib, mul_add, add_comm, add_left_comm, add_assoc]
+        simp [Finset.sum_add_distrib, mul_add, add_comm]
     linarith [hsum1, hsum2, hsum3]
   have hsum_final :
       (1 / (2 ^ N : ℝ)) *
@@ -720,20 +719,21 @@ theorem polymath14 x y : f (x * y * x⁻¹ * y⁻¹) ≤ 5 := by
       exact le_trans hpow hdiv'
     have hpow' : (2 ^ (2 * m) : ℝ) = (2 ^ m : ℝ) ^ 2 := by
       calc
-        (2 ^ (2 * m) : ℝ) = (2 : ℝ) ^ (2 * m) := by simp [Nat.cast_pow]
+        (2 ^ (2 * m) : ℝ) = (2 : ℝ) ^ (2 * m) := by simp
         _ = (2 : ℝ) ^ (m * 2) := by simp [mul_comm]
         _ = ((2 : ℝ) ^ m) ^ 2 := by simp [pow_mul]
-        _ = (2 ^ m : ℝ) ^ 2 := by simp [Nat.cast_pow]
+        _ = (2 ^ m : ℝ) ^ 2 := by simp
     have hsqrt :
         Real.sqrt (2 * (2 ^ (2 * m) : ℝ)) = Real.sqrt 2 * (2 ^ m : ℝ) := by
       have hpos : 0 ≤ (2 ^ (2 * m) : ℝ) := by positivity
       calc
         Real.sqrt (2 * (2 ^ (2 * m) : ℝ))
             = Real.sqrt 2 * Real.sqrt (2 ^ (2 * m) : ℝ) := by
-                simpa using (Real.sqrt_mul (by positivity : 0 ≤ (2 : ℝ)) (2 ^ (2 * m) : ℝ))
+                have hpos2 : 0 ≤ (2 : ℝ) := by linarith
+                simp [Real.sqrt_mul, hpos2]
         _ = Real.sqrt 2 * (2 ^ m : ℝ) := by
               have : Real.sqrt (2 ^ (2 * m) : ℝ) = |(2 ^ m : ℝ)| := by
-                simp [hpow', Real.sqrt_sq_eq_abs]
+                simp [hpow']
               simp [this]
     have hposA : 0 ≤ A f x y := A_nonneg (f := f) (x := x) (y := y)
     have hpow_ge (k : ℕ) : (1 : ℝ) ≤ (2 ^ k : ℝ) := by
