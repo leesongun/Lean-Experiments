@@ -21,7 +21,6 @@ instance (k n : ℕ) : Fintype (Word k n) := by
   infer_instance
 
 instance (k n : ℕ) : DecidableEq (Word k n) := by
-  classical
   dsimp [Word]
   infer_instance
 
@@ -44,7 +43,6 @@ lemma lineW_injective (k n : ℕ) :
           rfl
 
 noncomputable instance (k n : ℕ) : Fintype (LineW (Fin k) (Fin n)) := by
-  classical
   let _ : Finite (LineW (Fin k) (Fin n)) :=
     Finite.of_injective (fun l : LineW (Fin k) (Fin n) => (l.proper.1, l.idxFun))
       (lineW_injective k n)
@@ -115,7 +113,6 @@ def concatFinset {k n m : ℕ} (A : Finset (Word k n)) (B : Finset (Word k m)) :
 lemma mem_concatFinset {k n m : ℕ} {A : Finset (Word k n)} {B : Finset (Word k m)}
     {w : Word k (n + m)} :
     w ∈ concatFinset A B ↔ ∃ x ∈ A, ∃ y ∈ B, wordConcat x y = w := by
-  classical
   constructor
   · intro hw
     rcases Finset.mem_image.1 hw with ⟨p, hp, rfl⟩
@@ -144,13 +141,11 @@ lemma mem_sliceFinset_prefix_suffix {k n m : ℕ} (A : Finset (Word k (n + m)))
 lemma card_sigma_slices {k n m : ℕ} (A : Finset (Word k (n + m))) :
     (Finset.univ.sigma (fun x => sliceFinset A x)).card =
       Finset.sum (Finset.univ : Finset (Word k n)) (fun x => (sliceFinset A x).card) := by
-  classical
   simp
 
 lemma sigma_slices_image {k n m : ℕ} (A : Finset (Word k (n + m))) :
     (Finset.univ.sigma (fun x => sliceFinset A x)).image
       (fun p => wordConcat p.1 p.2) = A := by
-  classical
   ext w
   constructor
   · intro hw
@@ -169,7 +164,6 @@ lemma sigma_slices_image {k n m : ℕ} (A : Finset (Word k (n + m))) :
 
 lemma sum_card_slice_eq_card {k n m : ℕ} (A : Finset (Word k (n + m))) :
     Finset.sum (Finset.univ : Finset (Word k n)) (fun x => (sliceFinset A x).card) = A.card := by
-  classical
   have hcard :
       (Finset.univ.sigma (fun x => sliceFinset A x)).card = A.card := by
     have hinj : Function.Injective (fun p : Σ x : Word k n, Word k m =>
@@ -208,7 +202,6 @@ def fullSubspace (k m : ℕ) : SubspaceW (Fin m) (Fin k) (Fin m) where
 
 @[simp] lemma subspaceFinset_fullSubspace {k m : ℕ} :
     subspaceFinset (fullSubspace k m) = (Finset.univ : Finset (Word k m)) := by
-  classical
   ext x
   constructor
   · intro _hx
@@ -241,7 +234,6 @@ lemma lineFinset_lineConcatRight {k n m : ℕ} (x : Word k n)
     (l : LineW (Fin k) (Fin m)) :
     lineFinset (lineConcatRight x l) =
       (lineFinset l).image (fun y => wordConcat x y) := by
-  classical
   ext w
   constructor
   · intro hw
@@ -293,7 +285,6 @@ lemma subspaceFinset_subspaceConcatRight {k n m n' : ℕ} (x : Word k n)
     (V : SubspaceW (Fin m) (Fin k) (Fin n')) :
     subspaceFinset (subspaceConcatRight x V) =
       (subspaceFinset V).image (fun y => wordConcat x y) := by
-  classical
   ext w
   constructor
   · intro hw
@@ -472,7 +463,6 @@ lemma sliceFinset_slice {k n m r : ℕ} (A : Finset (Word k ((n + m) + r)))
           (castWordFinset (k := k) (n := (n + m) + r) (n' := n + (m + r))
             (Nat.add_assoc n m r) A) x) y =
       sliceFinset A (wordConcat x y) := by
-  classical
   ext z
   simp [mem_sliceFinset, wordConcat_assoc]
 
@@ -515,7 +505,6 @@ lemma sum_density_slice_eq_density {k n m : ℕ} (hk : 0 < k)
     (A : Finset (Word k (n + m))) :
     Finset.sum (Finset.univ : Finset (Word k n)) (fun x => density (sliceFinset A x)) =
       (k ^ n : ℝ) * density A := by
-  classical
   have hsum_nat :
       Finset.sum (Finset.univ : Finset (Word k n)) (fun x => (sliceFinset A x).card) = A.card :=
     sum_card_slice_eq_card (k := k) (n := n) (m := m) A
@@ -563,7 +552,6 @@ noncomputable def denseSliceSet {k n m : ℕ} (A : Finset (Word k (n + m))) (δ 
 lemma density_denseSliceSet {k n m : ℕ} (hk : 0 < k) {δ : ℝ} (hδ : 0 ≤ δ)
     (A : Finset (Word k (n + m))) (hA : density A ≥ δ) :
     density (denseSliceSet A (δ / 2)) ≥ δ / 2 := by
-  classical
   set B := denseSliceSet A (δ / 2) with hB
   let f : Word k n → ℝ := fun x => density (sliceFinset A x)
   let p : Word k n → Prop := fun x => δ / 2 ≤ f x
@@ -681,7 +669,6 @@ def containsSubspace_of_slice {k n m m' : ℕ} (x : Word k n) {A : Finset (Word 
 
 lemma card_line_le (k n : ℕ) :
     Fintype.card (LineW (Fin k) (Fin n)) ≤ (n + 1) * (k + 1) ^ n := by
-  classical
   have hinj := lineW_injective k n
   have hcard :
       Fintype.card (Fin n × (Fin n → Option (Fin k))) = n * (k + 1) ^ n := by
@@ -703,8 +690,8 @@ abbrev hasSubspace {k n m : ℕ} (A : Finset (Word k n)) : Prop :=
 
 /-
 `containsLine A` is a subtype that *records an actual line* inside `A`.
-We use `hasLine A` only for classical reasoning; extracting a witness
-uses `Classical.choice` and is therefore noncomputable.
+`hasLine A` is a bare `Nonempty` wrapper; extracting a witness uses choice
+and is therefore noncomputable.
 -/
 
 def containsLine_of_subset {k n : ℕ} {A B : Finset (Word k n)} (hAB : A ⊆ B) :
@@ -755,7 +742,6 @@ def lineToSubspace {k n : ℕ} (l : LineW (Fin k) (Fin n)) :
 
 lemma subspaceFinset_lineToSubspace {k n : ℕ} (l : LineW (Fin k) (Fin n)) :
     subspaceFinset (lineToSubspace l) = lineFinset l := by
-  classical
   ext w
   constructor
   · intro hw

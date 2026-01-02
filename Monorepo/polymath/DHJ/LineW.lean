@@ -7,6 +7,29 @@ structure LineW (α ι : Type*) where
   idxFun : ι → Option α
   proper : {i // idxFun i = none}
 
+instance instDecidableEqLineW {α ι : Type*} [DecidableEq α] [DecidableEq ι] [Fintype ι] :
+    DecidableEq (LineW α ι) := by
+  intro l₁ l₂
+  cases l₁ with
+  | mk idx₁ prop₁ =>
+      cases l₂ with
+      | mk idx₂ prop₂ =>
+          by_cases hidx : idx₁ = idx₂
+          · subst hidx
+            by_cases hprop : prop₁ = prop₂
+            · subst hprop
+              exact isTrue rfl
+            ·
+              refine isFalse ?_
+              intro h
+              cases h
+              exact hprop rfl
+          ·
+            refine isFalse ?_
+            intro h
+            cases h
+            exact hidx rfl
+
 def LineW.apply {α ι : Type*} (l : LineW α ι) (x : α) : ι → α :=
   fun i => (l.idxFun i).getD x
 
@@ -242,7 +265,6 @@ def LineW.IsCanonical {α : Type*} [DecidableEq α] {n : ℕ} (l : LineW α (Fin
 
 def LineW.fromIdxFun {α : Type*} [DecidableEq α] {n : ℕ}
     (w : Fin n → Option α) (h : ∃ i, w i = none) : LineW α (Fin n) := by
-  classical
   exact { idxFun := w, proper := Option.get _ (findNoneFin_isSome (w := w) h) }
 
 @[simp] lemma LineW.fromIdxFun_idxFun {α : Type*} [DecidableEq α] {n : ℕ}
@@ -252,7 +274,6 @@ def LineW.fromIdxFun {α : Type*} [DecidableEq α] {n : ℕ}
 @[simp] lemma LineW.isCanonical_fromIdxFun {α : Type*} [DecidableEq α] {n : ℕ}
     (w : Fin n → Option α) (h : ∃ i, w i = none) :
     LineW.IsCanonical (LineW.fromIdxFun w h) := by
-  classical
   have hsome := findNoneFin_isSome (w := w) h
   have hget := (Option.coe_get (o := findNoneFin (n := n) w) hsome)
   dsimp [LineW.IsCanonical, LineW.fromIdxFun]

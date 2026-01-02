@@ -20,7 +20,7 @@ open Polymath.DHJ
 section GrahamRothschild
 
 /-- Graham--Rothschild, Option-alphabet form (monochromatic parameter set of lines). -/
-noncomputable def graham_rothschild_option {k m : ℕ} :
+def graham_rothschild_option {k m : ℕ} :
     Σ n, ∀ L : Set (LineW (Fin k) (Fin n)),
       DecidablePred L →
         {S : SubspaceW (Fin m) (Option (Fin k)) (Fin n) //
@@ -52,7 +52,6 @@ lemma line_exists_of_increment
       ∀ {A : Finset (Word k n)}, density A ≥ δ → ¬ hasLine A →
         {B : Finset (Word k n) // B ⊆ A ∧ density B ≥ density A + γ}) :
     hasLine A := by
-  classical
   by_contra hline
   have hiter :
       ∀ t : ℕ,
@@ -376,7 +375,6 @@ lemma uniform_slice_subspace_of_steps_exists {k m n : ℕ} (hk : 2 ≤ k) (hm : 
       {V : SubspaceW (Fin m) (Fin k) (Fin lhl.1) //
         ∀ x ∈ subspaceFinset V,
           density (sliceAt A (Nat.le_of_lt lhl.2) x) ≥ density A - ε}) := by
-  classical
   by_contra hgood
   have hbad :
       ∀ l, ∀ hl : l < n, ∀ V : SubspaceW (Fin m) (Fin k) (Fin l),
@@ -651,7 +649,6 @@ noncomputable def mdhj_of_dhj_succ {k : ℕ} (hk : 2 ≤ k)
       simpa using (mdhj_of_dhj (h := dhj δ hδ hδ1))
   | succ m ih =>
       intro δ hδ hδ1
-      classical
       let δ1 : ℝ := δ / 2
       have hδ1pos : 0 < δ1 := by
         dsimp [δ1]

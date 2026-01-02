@@ -21,7 +21,6 @@ def linesMonochromatic {k n m : ℕ}
 lemma line_idxFun_eq_of_apply_eq {α ι : Type*} [Nontrivial α]
     {l : LineW α ι} {i j : ι} (h : ∀ a, l a i = l a j) :
     l.idxFun i = l.idxFun j := by
-  classical
   cases hi : l.idxFun i with
   | none =>
       cases hj : l.idxFun j with
@@ -47,7 +46,6 @@ lemma line_idxFun_eq_of_apply_eq {α ι : Type*} [Nontrivial α]
 lemma line_idxFun_eq_some_of_apply_const {α ι : Type*} [Nontrivial α]
     {l : LineW α ι} {i : ι} {a : α} (h : ∀ x, l x i = a) :
     l.idxFun i = some a := by
-  classical
   cases hi : l.idxFun i with
   | none =>
       obtain ⟨y, hy⟩ := exists_ne a
@@ -273,7 +271,6 @@ lemma lineColor_lineOfLineSubspace {k n m : ℕ}
     (l : LineW (Fin k) (Fin m)) :
     lineColor L decL (S l.idxFun) =
       @decide (L (lineOfLineSubspace S l)) (decL _) := by
-  classical
   let w : Fin n → Option (Fin k) := S l.idxFun
   have hw : ∃ i, w i = none := by
     refine ⟨(S.proper l.proper.1).1, ?_⟩
@@ -315,7 +312,7 @@ lemma linesMonochromatic_of_isMono {k n m : ℕ}
         simpa [lineColor_lineOfLineSubspace] using hcolor
       exact (Bool.decide_iff _).1 hdec
 
-noncomputable def linesMonochromatic_option {k m : ℕ} :
+def linesMonochromatic_option {k m : ℕ} :
     Σ n, ∀ L : Set (LineW (Fin k) (Fin n)),
       DecidablePred L →
         {S : SubspaceW (Fin m) (Option (Fin k)) (Fin n) //
@@ -334,7 +331,6 @@ lemma line_idxFun_eq_of_same_variable {k n m : ℕ} [Nontrivial (Fin k)]
     {i j : Fin n} {e : Fin m}
     (hi : V.idxFun i = Sum.inr e) (hj : V.idxFun j = Sum.inr e) :
     L.idxFun i = L.idxFun j := by
-  classical
   have happly : ∀ a, L a i = L a j := by
     intro a
     have hmem : L a ∈ subspaceFinset V := by
@@ -350,12 +346,11 @@ lemma line_idxFun_eq_of_same_variable {k n m : ℕ} [Nontrivial (Fin k)]
       _ = L a j := by rw [hb']
   exact line_idxFun_eq_of_apply_eq happly
 
-noncomputable def lineOfSubspace {k n m : ℕ} (hk : 2 ≤ k)
+def lineOfSubspace {k n m : ℕ} (hk : 2 ≤ k)
     (V : SubspaceW (Fin m) (Fin k) (Fin n))
     {L : LineW (Fin k) (Fin n)}
     (hL : lineFinset L ⊆ subspaceFinset V) :
     LineW (Fin k) (Fin m) := by
-  classical
   let w : Fin m → Option (Fin k) := fun e => L.idxFun (V.proper e).1
   have hw : ∃ e, w e = none := by
     haveI : Nontrivial (Fin k) := (Fin.nontrivial_iff_two_le).2 hk
@@ -393,7 +388,6 @@ lemma lineInSubspace_lineOfSubspace {k n m : ℕ} (hk : 2 ≤ k)
     (hL : lineFinset L ⊆ subspaceFinset V)
     (hcanon : LineW.IsCanonical L) :
     lineInSubspace V (lineOfSubspace hk V hL) = L := by
-  classical
   haveI : Nontrivial (Fin k) := (Fin.nontrivial_iff_two_le).2 hk
   apply LineW.ext_of_canonical
   · simp [lineInSubspace, LineW.isCanonical_fromIdxFun]
@@ -425,7 +419,6 @@ lemma lineOfSubspace_lineInSubspace {k n m : ℕ} (hk : 2 ≤ k)
     (V : SubspaceW (Fin m) (Fin k) (Fin n))
     (l : LineW (Fin k) (Fin m)) (hcanon : LineW.IsCanonical l) :
     lineOfSubspace hk V (lineInSubspace_subset V l) = l := by
-  classical
   apply LineW.ext_of_canonical
   · simp [lineOfSubspace, LineW.isCanonical_fromIdxFun]
   · exact hcanon
